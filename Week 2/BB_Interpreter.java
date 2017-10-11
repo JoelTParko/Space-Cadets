@@ -2,8 +2,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.*;
 
-
-
 public class BB_Interpreter {
     public String[] commands = {"clear", "incr", "decr", "while", "end"};
     public Map<String, Integer> variables = new HashMap<>();
