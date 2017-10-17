@@ -5,12 +5,12 @@ import java.io.InputStreamReader;
 
 public class BB_Main {
     public static void main(String[] args)throws Exception{
-        String fileName;
+        String fileName = getInput();
         String fileLocation;
-        fileName = getInput();
         
+        //Construct the file path.
         fileLocation = System.getenv("UserProfile") + "\\Documents\\BareBones\\" + fileName + ".txt";
-        System.out.println(fileLocation);
+        
         //Test if the file exists.
 		File testFile = new File(fileLocation);
 		if (testFile.exists()) {
@@ -22,11 +22,11 @@ public class BB_Main {
 		}
 		
 		FileReader bbCode = new FileReader(fileLocation);
-		
         bbCode.readFile();
-
     }
+    
     public static String getInput()throws Exception{
+    	//Gets a file name input from the user.
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Enter your file name");
         return input.readLine();
