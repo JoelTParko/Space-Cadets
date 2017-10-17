@@ -2,10 +2,10 @@ import java.io.*;
 import java.util.Stack;
 
 public class FileReader {
-    public String file;
+    public String filePath;
 
-    public FileReader(String file){
-        this.file = file;
+    public FileReader(String filePath){
+        this.filePath = filePath;
     }
     public void readFile() throws Exception{
         String currentLine;
@@ -14,9 +14,9 @@ public class FileReader {
         int whileCount = 0;
         long linePointer;
         long endPoint = 0;
-        Stack whileStack = new Stack();
+        Stack<Long> whileStack = new Stack<Long>();
         BB_Interpreter interpreter = new BB_Interpreter();
-        File bbCode = new File(file);
+        File bbCode = new File(filePath);
         RandomAccessFile codeReader = new RandomAccessFile(bbCode, "r");
         while ((currentLine=codeReader.readLine())!=null) {
             nextCommand = interpreter.readLine(currentLine);
