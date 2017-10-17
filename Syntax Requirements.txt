@@ -1,0 +1,2 @@
+-Cannot use indentation
+-Variables must be "cleared" to declare them within the program.
