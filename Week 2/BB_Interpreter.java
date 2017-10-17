@@ -12,14 +12,14 @@ public class BB_Interpreter {
         String varName = null;
         String[] instruction;
         for (String patternString: commands) {
-            //Pattern pattern = Pattern.compile("\\s*"+patternString+"\\s+(\\w+)\\s*");
-            Pattern pattern = Pattern.compile(patternString);
+            Pattern pattern = Pattern.compile("^(?:\\s*"+patternString+"\\s+(\\w+)(?:\\s+not\\s+\\d+\\s+do)?\\s*;\\s*)|(?:\\s*"+patternString+"\\s*;\\s*)$");
+            //Pattern pattern = Pattern.compile(patternString);
             Matcher matcher = pattern.matcher(currentLine);
             if(matcher.find()){
                 command = patternString;
-                if (patternString != "end") {
-                    //varName = matcher.group(1);
-                    varName = Character.toString(currentLine.charAt(matcher.end() + 1));
+                if (command != "end") {
+                    varName = matcher.group(1);
+                    //varName = Character.toString(currentLine.charAt(matcher.end() + 1));
                 }
                 instruction = new String[]{command, varName};
                 return instruction;
