@@ -2,12 +2,9 @@ import java.io.*;
 import java.util.Stack;
 
 public class FileReader {
-<<<<<<< HEAD
     public String filePath;
-=======
 	
     public String file;
->>>>>>> bd4e93905d4823565c12971f412d199f7848f731
 
     public FileReader(String filePath){
         this.filePath = filePath;

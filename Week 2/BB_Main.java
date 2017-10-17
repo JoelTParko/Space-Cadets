@@ -21,11 +21,9 @@ public class BB_Main {
 		}
 		
 		FileReader bbCode = new FileReader(fileLocation);
-=======
         String fileName;
         fileName = getInput();
         FileReader bbCode = new FileReader("C:\\Users\\Joelt\\Space Cadets Programs\\Barebones\\" + fileName + ".txt");
->>>>>>> c3326d6c617d49fccf89ed35f3b78ba5d6722c99
         bbCode.readFile();
     }
     

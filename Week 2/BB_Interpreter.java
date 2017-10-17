@@ -19,17 +19,14 @@ public class BB_Interpreter {
             Matcher matcher = pattern.matcher(currentLine);
             
             if(matcher.find()){
-<<<<<<< HEAD
                 command = currentLine.substring(matcher.start(), matcher.end());
                 
                 if (patternString != "end") {
                     varName = Character.toString(currentLine.charAt(matcher.end() + 1));
-=======
                 command = patternString;
                 if (command != "end") {
                     varName = matcher.group(1);
                     //varName = Character.toString(currentLine.charAt(matcher.end() + 1));
->>>>>>> 1ea5df4115f0f669414e08b1553e67819e4c8ce5
                 }
                 
                 //Create and return the instruction.
