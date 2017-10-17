@@ -18,7 +18,7 @@ public class FileReader {
         int whileCount = 0;
         long linePointer;
         long endPoint = 0;
-        Stack<Long> whileStack = new Stack<Long>();
+        Stack<Long> whileStack = new Stack<>();
         BB_Interpreter interpreter = new BB_Interpreter();
         File bbCode = new File(filePath);
         RandomAccessFile codeReader = new RandomAccessFile(bbCode, "r");
@@ -39,7 +39,7 @@ public class FileReader {
                 
             }else if(nextCommand[0].equals("end") && whileCount>0) {
                 endPoint = codeReader.getFilePointer();
-                linePointer = (long)whileStack.pop();
+                linePointer = whileStack.pop();
                 whileCount--;
                 codeReader.seek(linePointer);
             }else {
