@@ -11,7 +11,7 @@ public class FileReader {
     }
     
     public void readFile() throws Exception{
-    	
+    	String commandLine;
         String currentLine;
         String[] nextCommand;
         boolean inWhile;
@@ -24,10 +24,11 @@ public class FileReader {
         RandomAccessFile codeReader = new RandomAccessFile(bbCode, "r");
         
         while ((currentLine=codeReader.readLine())!=null) {
-            nextCommand = interpreter.readLine(currentLine);
+            commandLine = interpreter.deCommenter(currentLine);
+            nextCommand = interpreter.readLine(commandLine);
             
             if(nextCommand[0].equals("while")) {
-                inWhile = interpreter.executeWhile(nextCommand[1], currentLine);
+                inWhile = interpreter.executeWhile(nextCommand[1], commandLine);
                 
                 if (!inWhile) {
                     codeReader.seek(endPoint);
@@ -42,7 +43,7 @@ public class FileReader {
                 linePointer = whileStack.pop();
                 whileCount--;
                 codeReader.seek(linePointer);
-            }else {
+            }else{
                 interpreter.executeCommand(nextCommand[0], nextCommand[1]);
             }
             
