@@ -14,20 +14,15 @@ public class BB_Interpreter {
         //Loop through all of the commands
         for (String patternString: commands) {
             Pattern pattern = Pattern.compile("^(?:\\s*"+patternString+"\\s+(\\w+)(?:\\s+not\\s+\\d+\\s+do)?\\s*;\\s*)|(?:\\s*"+patternString+"\\s*;\\s*)$");
-            //Pattern pattern = Pattern.compile(patternString);
             Matcher matcher = pattern.matcher(currentLine);
-
             if(matcher.find()){
                 if (patternString != "end") {
                     varName = matcher.group(1);
-                    //varName = Character.toString(currentLine.charAt(matcher.end() + 1));
                 }
-
                 //Create and return the instruction.
                 instruction = new String[]{patternString, varName};
                 return instruction;
             }
-
         }
 
         //Returns null if no instruction is found.
@@ -68,6 +63,10 @@ public class BB_Interpreter {
             System.out.println(test + variables.get(test));
         }
 
+    }
+
+    public String deCommenter(String currentLine){
+        return currentLine.split("//")[0];
     }
 
 
