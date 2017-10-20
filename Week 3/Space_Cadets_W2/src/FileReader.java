@@ -1,56 +1,36 @@
 import java.io.*;
-import java.util.Stack;
+
+import java.util.ArrayList;
+
+import java.util.List;
+
+
 
 public class FileReader {
     public String filePath;
-	
-    public String file;
+	public File file;
 
     public FileReader(String filePath){
         this.filePath = filePath;
+        this.file = new File(filePath);
     }
     
-    public void readFile() throws Exception{
-    	String commandLine;
+    public List<String> readFile() throws Exception {
         String currentLine;
-        String[] nextCommand;
-        boolean inWhile;
-        int whileCount = 0;
-        long linePointer;
-        long endPoint = 0;
-        Stack<Long> whileStack = new Stack<>();
-        BB_Interpreter interpreter = new BB_Interpreter();
-        File bbCode = new File(filePath);
-        RandomAccessFile codeReader = new RandomAccessFile(bbCode, "r");
-        
-        while ((currentLine=codeReader.readLine())!=null) {
-            commandLine = interpreter.deCommenter(currentLine);
-            nextCommand = interpreter.readLine(commandLine);
-            
-            if(nextCommand[0].equals("while")) {
-                inWhile = interpreter.executeWhile(nextCommand[1], commandLine);
-                
-                if (!inWhile) {
-                    codeReader.seek(endPoint);
-                } else {
-                    linePointer = codeReader.getFilePointer();
-                    whileStack.push(linePointer - (currentLine.length() + 2));
-                    whileCount++;
-                }
-                
-            }else if(nextCommand[0].equals("end") && whileCount>0) {
-                endPoint = codeReader.getFilePointer();
-                linePointer = whileStack.pop();
-                whileCount--;
-                codeReader.seek(linePointer);
-            }else{
-                interpreter.executeCommand(nextCommand[0], nextCommand[1]);
+        List<String> fileLines = new ArrayList<String>();
+
+        BufferedReader br = new BufferedReader(new java.io.FileReader(file));
+
+        //Reads in every line of the program
+        while((currentLine = br.readLine()) != null){
+            if(!currentLine.isEmpty()){
+                fileLines.add(currentLine);
             }
-            
         }
-        
-        codeReader.close();
-        interpreter.printState();
+        return  fileLines;
+
     }
-    
+
+
+
 }
