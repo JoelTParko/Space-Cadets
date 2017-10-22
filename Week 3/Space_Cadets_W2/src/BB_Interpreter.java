@@ -1,3 +1,4 @@
+import java.beans.Expression;
 import java.util.HashMap;
 import java.util.regex.*;
 import java.util.*;
@@ -11,7 +12,7 @@ public class BB_Interpreter
     private Map<String, Integer> functions = new HashMap<>();
     private Stack<Integer> whileStack = new Stack<>();
     private String[] commands = {"clear", "incr", "decr", "while", "end", ""};
-    private Map<String, Integer> variables = new HashMap<>();
+    private HashMap<String, Integer> variables = new HashMap<>();
     private List<String> fileLines;
 
     public BB_Interpreter(List<String> fileLines)
@@ -68,14 +69,20 @@ public class BB_Interpreter
 
 
         token = readToken(currentLine); //Identifies the token, will execute the code if its a basic command/Checks for condition met in while loops
-        if(token == "while"){
-            if(!inWhile){ //Jumps to the end of a while loop if the condition was met
+        if(token == "while")
+        {
+            if(!inWhile)
+            { //Jumps to the end of a while loop if the condition was met
                 jumpPoint = endIndex;
-            }else{ //Adds the location of the current while statement to the while stack
+            }
+            else    //Adds the location of the current while statement to the while stack
+            {
                 whileStack.push(index - 1);
                 whileCount++;
             }
-        }else if(token == "end" && whileCount > 0){//Checks if the program should jump back to the previous while statement or not
+        }
+        else if(token == "end" && whileCount > 0)   //Checks if the program should jump back to the previous while statement or not
+        {
             jumpPoint = whileStack.pop();
             endIndex = index;
             whileCount--;
@@ -99,30 +106,116 @@ public class BB_Interpreter
         String varName;
 
         //Loop through all of the commands
-        for (String token : commands) {
-            Pattern pattern = Pattern.compile("^(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)$");
+        for (String token : commands)
+        {
+            Pattern pattern = Pattern.compile("(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)");
             Matcher matcher = pattern.matcher(currentLine);
-            if (matcher.find()) { //Checks if the current token matches the one in the BB code
-                if (token != "end") {
+            if (matcher.matches())     //Checks if the current token matches the one in the BB code
+            {
+                if (token != "end")
+                {
                     varName = matcher.group(1); //Finds the name of the variable that is being used
-                    if (token == "while") {
+                    if (token == "while")
+                    {
                         inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
-                    } else {
+                    }
+                    else
+                    {
                         executeCommand(token, varName); //Executes one of the three basic commands
                     }
                 }
                 return token;
             }
         }
+        Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
+        if (assignmentMatcher.matches())
+        {
+            Attempt evaluationAttempt = evaluate(assignmentMatcher.group(2));
+            if (evaluationAttempt.isSuccess)
+            {
+                variables.put(assignmentMatcher.group(1), evaluationAttempt.result);
+            }
+        }
         return null;
     }
 
-    
+    private static Pattern assignmentPattern = Pattern.compile("\\s*(\\w+)\\s*=(.*);");
+    private static Pattern intPattern = Pattern.compile("\\s*(\\d+)\\s*");
+    private static Pattern varPattern = Pattern.compile("\\s*[+-]?\\s*(\\w+)\\s*");
+    private static Pattern bracketsPattern = Pattern.compile("\\s*\\((.+)\\)\\s*");
+    private static Pattern additionPattern = Pattern.compile("(.*)\\+(.*)");
+    private static Pattern multiplicationPattern = Pattern.compile("(.*)\\*(.*)");
+    private static Pattern subtractionPattern = Pattern.compile("(.*)-(.*)");
+    private static Pattern divisionPattern = Pattern.compile("(.*)/(.*)");
+
+    //Evaluates a mathematical expression
+    private Attempt evaluate(String expression)
+    {
+
+        Matcher intMatcher = intPattern.matcher(expression);
+        if (intMatcher.matches())
+            return new Attempt(true, Integer.parseInt(intMatcher.group(1)));
+
+        Matcher varMatcher = varPattern.matcher(expression);
+        if (varMatcher.matches() && variables.containsKey(varMatcher.group(1)))
+            return new Attempt(true, variables.get(varMatcher.group(1)));
+
+        Matcher additionMatcher = additionPattern.matcher(expression);
+        if (additionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(additionMatcher.group(1));
+            Attempt rightAttempt = evaluate(additionMatcher.group(2));
+            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result + rightAttempt.result);
+        }
+
+        Matcher multiplicationMatcher = multiplicationPattern.matcher(expression);
+        if (multiplicationMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(multiplicationMatcher.group(1));
+            Attempt rightAttempt = evaluate(multiplicationMatcher.group(2));
+            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result * rightAttempt.result);
+        }
+
+        Matcher divisionMatcher = divisionPattern.matcher(expression);
+        if (divisionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(divisionMatcher.group(1));
+            Attempt rightAttempt = evaluate(divisionMatcher.group(2));
+            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result / rightAttempt.result);
+        }
+
+        Matcher subtractionMatcher = subtractionPattern.matcher(expression);
+        if (subtractionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(subtractionMatcher.group(1));
+            Attempt rightAttempt = evaluate(subtractionMatcher.group(2));
+            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result / rightAttempt.result);
+        }
+
+        Matcher bracketsMatcher = bracketsPattern.matcher(expression);
+        if (varMatcher.matches())
+            return evaluate(bracketsMatcher.group(1));
+
+        return new Attempt(false, 0);
+    }
+
+    private class Attempt
+    {
+        public boolean isSuccess;
+        public int result;
+
+        public Attempt(boolean isSuccess, int result)
+        {
+            this.isSuccess = isSuccess;
+            this.result = result;
+        }
+    }
     
     public void executeCommand(String command, String varName)
     {
-    	//Execute the command, based on the operator and operand.
-        switch (command){
+        //Execute the command, based on the operator and operand.
+        switch (command)
+        {
             case "clear":
                 variables.put(varName, 0);
                 break;
@@ -140,7 +233,8 @@ public class BB_Interpreter
     public boolean whileCheck(String varName, String value)
     {
 
-        if (variables.get(varName) == Integer.parseInt(value)) {
+        if (variables.get(varName) == Integer.parseInt(value))
+        {
             return false;
         }
         return true;
@@ -148,8 +242,9 @@ public class BB_Interpreter
     
     public void printState()
     {
-    	//Prints the variables at the end.
-        for (String test:variables.keySet()) {
+        //Prints the variables at the end.
+        for (String test:variables.keySet())
+        {
             System.out.println(test + variables.get(test));
         }
 
