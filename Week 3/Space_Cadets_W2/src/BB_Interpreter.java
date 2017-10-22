@@ -2,7 +2,8 @@ import java.util.HashMap;
 import java.util.regex.*;
 import java.util.*;
 
-public class BB_Interpreter {
+public class BB_Interpreter
+{
     private boolean inWhile;
     private int whileCount = 0;
     private int startIndex = 0;
@@ -13,14 +14,16 @@ public class BB_Interpreter {
     private Map<String, Integer> variables = new HashMap<>();
     private List<String> fileLines;
 
-    public BB_Interpreter(List<String> fileLines){
+    public BB_Interpreter(List<String> fileLines)
+    {
         this.fileLines = fileLines;
         this.endIndex = fileLines.size();
 
         //findFunctions();
     }
 
-    public BB_Interpreter(List<String> fileLines, int startIndex, int endIndex){
+    public BB_Interpreter(List<String> fileLines, int startIndex, int endIndex)
+    {
         this.fileLines = fileLines;
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -29,7 +32,8 @@ public class BB_Interpreter {
     }
 
     /*
-    public void findFunctions(){
+    public void findFunctions()
+    {
         String currentLine;
         String functionName;
         boolean foundFunction;
@@ -48,7 +52,8 @@ public class BB_Interpreter {
         }
     }
 */
-    public int next(String currentLine, int index){
+    public int next(String currentLine, int index)
+    {
 
         String token;
         int jumpPoint = 0;
@@ -89,7 +94,8 @@ public class BB_Interpreter {
     }
     */
 
-    public String readToken(String currentLine) {
+    public String readToken(String currentLine)
+    {
         String varName;
 
         //Loop through all of the commands
@@ -113,7 +119,8 @@ public class BB_Interpreter {
 
     
     
-    public void executeCommand(String command, String varName){
+    public void executeCommand(String command, String varName)
+    {
     	//Execute the command, based on the operator and operand.
         switch (command){
             case "clear":
@@ -130,7 +137,8 @@ public class BB_Interpreter {
         }
     }
     
-    public boolean whileCheck(String varName, String value){
+    public boolean whileCheck(String varName, String value)
+    {
 
         if (variables.get(varName) == Integer.parseInt(value)) {
             return false;
@@ -138,7 +146,8 @@ public class BB_Interpreter {
         return true;
     }
     
-    public void printState(){
+    public void printState()
+    {
     	//Prints the variables at the end.
         for (String test:variables.keySet()) {
             System.out.println(test + variables.get(test));
