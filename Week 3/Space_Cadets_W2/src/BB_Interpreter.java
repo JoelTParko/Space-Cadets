@@ -18,7 +18,7 @@ public class BB_Interpreter
     private Map<String, Integer[]> functions = new HashMap<>();
     private Stack<Integer> whileStack = new Stack<>();
     private HashMap<String, Integer> variables = new HashMap<>();
-    private String[] commands = {"clear", "incr", "decr", "while", "end","return", ""};
+    private String[] commands = {"clear", "incr", "decr", "while", "end","return"};
     private List<String> fileLines;
 
     public BB_Interpreter(List<String> fileLines)
@@ -29,10 +29,23 @@ public class BB_Interpreter
         findFunctions();
     }
 
-    public BB_Interpreter(List<String> fileLines, int funcDepth){
+    public BB_Interpreter(List<String> fileLines, int funcDepth, List<Integer> paraValues, int startPoint){
         this.fileLines = fileLines;
         this.endIndex = fileLines.size();
         this.funcDepth = funcDepth;
+
+        String[] varNames = null;
+        Pattern func = Pattern.compile("^func\\s+(\\w+)\\((\\w*(?:,\\s*\\w*)*)\\)\\s*:\\s*$");
+        Matcher match = func.matcher(fileLines.get(startPoint-1));
+        String t = fileLines.get(startPoint-1);
+        if(match.find()){
+            varNames =  match.group(2).split(",");
+        }
+
+        Iterator it = paraValues.iterator();
+        for (String name: varNames) {
+            variables.put(name.replaceAll("\\s*",""), (int)it.next());
+        }
         findFunctions();
     }
 
@@ -48,7 +61,7 @@ public class BB_Interpreter
         Integer[] locations = {0,0};
         int index;
 
-        Pattern startFunc = Pattern.compile("^func\\s+(\\w+)\\(\\)\\s*:\\s*$");
+        Pattern startFunc = Pattern.compile("^func\\s+(\\w+)\\((?:\\w*(,\\s*\\w*)*)\\)\\s*:\\s*$");
         Pattern endFunc = Pattern.compile("^fEnd;$");
         Iterator<String> iterator = fileLines.listIterator(startIndex);
         index = startIndex;
@@ -63,9 +76,10 @@ public class BB_Interpreter
                 funcName = match.group(1);
                 funcFound = true;
 
-            }else if(!match2.find()&&funcFound){
+            }else if(match2.find()&&funcFound){
                 locations[1] = index;
                 functions.put(funcName,locations);
+                funcFound = false;
             }
 
         }
@@ -73,6 +87,7 @@ public class BB_Interpreter
 
 
     public int next(String currentLine, int index){
+        StringBuilder parameters = new StringBuilder();
         StringBuilder funcName = new StringBuilder();
         String token;
         StringBuilder varName = new StringBuilder();
@@ -80,13 +95,18 @@ public class BB_Interpreter
         //Removes comments from the code
         currentLine = deCommenter(currentLine);
 
-        if(checkForFunction(currentLine, funcName, varName)){
+        if(checkForFunction(currentLine, funcName, varName, parameters)){
             int funcIndex;
             int funcJump;
             int returnValue;
+            List<Integer> paraValues = new ArrayList<>();
             returnJump = index;
+            String[] parameterList = parameters.toString().split(",");
 
-            BB_Interpreter functionInterpreter = new BB_Interpreter(fileLines, funcDepth+1);
+            for (String para: parameterList) {
+                paraValues.add(evaluate(para).result);
+            }
+            BB_Interpreter functionInterpreter = new BB_Interpreter(fileLines, funcDepth+1,paraValues, functions.get(funcName.toString())[0]);
             PositionableIterator iterator = new PositionableIterator(fileLines);
             iterator.moveTo(functions.get(funcName.toString())[0]);
             funcIndex = functions.get(funcName.toString())[0];
@@ -99,7 +119,7 @@ public class BB_Interpreter
                     funcIndex = funcJump;
                 }else if(funcJump == -1){
                     returnValue = functionInterpreter.getReturnValue();
-                    String test = varName.toString();
+
                     variables.put(varName.toString(),variables.get(varName.toString())+returnValue);
                     funcIndex = functions.get(funcName.toString())[1];
                 }
@@ -125,14 +145,15 @@ public class BB_Interpreter
         return returnJump;
     }
 
-    public boolean checkForFunction(String currentLine, StringBuilder fName, StringBuilder varName){ //checks for a function call
+    public boolean checkForFunction(String currentLine, StringBuilder fName, StringBuilder varName, StringBuilder parameters){ //checks for a function call
     
         for (String funcName: functions.keySet()) {
-            String patternString = "^(?:(\\w+)\\s*=\\s*)?"+funcName+"\\((?:\\w*(,\\s*\\w*)*)?\\);\\s*$";
+            String patternString = "^(?:(\\w+)\\s*=\\s*)?"+funcName+"\\((\\w*(,\\s*\\w*)*)?\\);\\s*$";
             Pattern pattern = Pattern.compile(patternString);
             Matcher match = pattern.matcher(currentLine);
             if(match.find()){
                 fName.append(funcName);
+                parameters.append(match.group(2));
                 for (String var: variables.keySet()) {
                     String test = match.group(1);
                     if (var.equals(test)){
