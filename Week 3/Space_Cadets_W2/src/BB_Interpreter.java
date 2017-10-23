@@ -147,6 +147,7 @@ public class BB_Interpreter
     private static Pattern multiplicationPattern = Pattern.compile("(.+)\\*(.+)");
     private static Pattern subtractionPattern = Pattern.compile("(.*)-(.*)");
     private static Pattern divisionPattern = Pattern.compile("(.*)/(.*)");
+    private static Pattern moduloPattern = Pattern.compile("(.*)%(.*)");
 
     //Evaluates a mathematical expression
     private Attempt evaluate(String expression)
@@ -154,6 +155,33 @@ public class BB_Interpreter
         Matcher bracketsMatcher = bracketsPattern.matcher(expression);
         if (bracketsMatcher.matches())
             return evaluate(bracketsMatcher.group(1));
+
+        Matcher additionMatcher = additionPattern.matcher(expression);
+        if (additionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(additionMatcher.group(1));
+            Attempt rightAttempt = evaluate(additionMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+                return new Attempt(true, leftAttempt.result + rightAttempt.result);
+        }
+
+        Matcher subtractionMatcher = subtractionPattern.matcher(expression);
+        if (subtractionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(subtractionMatcher.group(1));
+            Attempt rightAttempt = evaluate(subtractionMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+                return new Attempt(true, leftAttempt.result - rightAttempt.result);
+        }
+
+        Matcher moduloMatcher = moduloPattern.matcher(expression);
+        if (moduloMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(moduloMatcher.group(1));
+            Attempt rightAttempt = evaluate(moduloMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+                return new Attempt(true, leftAttempt.result % rightAttempt.result);
+        }
 
         Matcher multiplicationMatcher = multiplicationPattern.matcher(expression);
         if (multiplicationMatcher.matches())
@@ -173,23 +201,7 @@ public class BB_Interpreter
                 return new Attempt(true, leftAttempt.result / rightAttempt.result);
         }
 
-        Matcher additionMatcher = additionPattern.matcher(expression);
-        if (additionMatcher.matches())
-        {
-            Attempt leftAttempt = evaluate(additionMatcher.group(1));
-            Attempt rightAttempt = evaluate(additionMatcher.group(2));
-            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
-            return new Attempt(true, leftAttempt.result + rightAttempt.result);
-        }
 
-        Matcher subtractionMatcher = subtractionPattern.matcher(expression);
-        if (subtractionMatcher.matches())
-        {
-            Attempt leftAttempt = evaluate(subtractionMatcher.group(1));
-            Attempt rightAttempt = evaluate(subtractionMatcher.group(2));
-            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
-            return new Attempt(true, leftAttempt.result / rightAttempt.result);
-        }
 
         Matcher intMatcher = intPattern.matcher(expression);
         if (intMatcher.matches())
@@ -246,9 +258,10 @@ public class BB_Interpreter
     public void printState()
     {
         //Prints the variables at the end.
+        System.out.println("Final State:");
         for (String test:variables.keySet())
         {
-            System.out.println(test + variables.get(test));
+            System.out.println(test + " = " + variables.get(test));
         }
 
     }
