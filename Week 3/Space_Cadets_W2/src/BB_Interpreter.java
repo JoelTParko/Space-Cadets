@@ -118,7 +118,7 @@ public class BB_Interpreter
                 }else if(funcJump == -1){
                     returnValue = functionInterpreter.getReturnValue();
 
-                    variables.put(varName.toString(),variables.get(varName.toString())+returnValue);
+                    variables.put(varName.toString(),returnValue);
                     funcIndex = functions.get(funcName.toString())[1];
                 }
             }while(funcIndex< functions.get(funcName.toString())[1]);
@@ -167,8 +167,7 @@ public class BB_Interpreter
     public String readToken(String currentLine)
     {
         String varName;
-        Pattern pattern;
-        
+
         if(ifSkips.isEmpty()) ifSkips.add(false);
 
         Matcher ifMatcher = ifPattern.matcher(currentLine);
@@ -187,52 +186,47 @@ public class BB_Interpreter
         }
                 	
         
-        if (ifSkips.get(ifDepth) == false) 
-        {
-        	//Loop through all of the commands
-        	for (String token : commands)
-            {
-            	if(funcDepth==0) {
-            		pattern = Pattern.compile("^(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "(\\w+|\\d+)?;\\s*)$");
-            	}else{
-            		StringBuilder tabs = new StringBuilder();
-            		for (int i = 1; i <= funcDepth ; i++) {
-                    	tabs = tabs.append("\\t");
-            	}
- 
-                pattern = Pattern.compile("^"+tabs.toString()+"(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "\\s*;\\s*)$");
-	            Matcher matcher = pattern.matcher(currentLine);
-	            
-	            if (matcher.find()) { //Checks if the current token matches the one in the BB code
-	                if (token != "end" && token != "return") {
-	                    varName = matcher.group(1); //Finds the name of the variable that is being used
-	                    if (token == "while") {
-	                        inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
-	                    } else {
-	                        executeCommand(token, varName); //Executes one of the three basic commands
-	                    }
-	                }else if(token == "return"){
-	                    return "return"+matcher.group(1);
-	                }
-	                return token;
-	            }
+        if (ifSkips.get(ifDepth) == false) {
+            //Loop through all of the commands
+            Pattern pattern = Pattern.compile("");
+            for (String token : commands) {
+                if (funcDepth == 0) {
+                    pattern = Pattern.compile("^(?:" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "(\\w+|\\d+)?;\\s*)$");
+                } else {
+                    StringBuilder tabs = new StringBuilder();
+                    for (int i = 1; i <= funcDepth; i++) {
+                        tabs = tabs.append("\\t");
+                        pattern = Pattern.compile("^" + tabs.toString() + "(?:" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "\\s*;\\s*)$");
+                    }
+                }
 
-            	}
-    
-        Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
-        if (assignmentMatcher.matches())
-        {
-            Attempt evaluationAttempt = evaluate(assignmentMatcher.group(2));
-            if (evaluationAttempt.isSuccess)
-            {
-                variables.put(assignmentMatcher.group(1), evaluationAttempt.result);
+                Matcher matcher = pattern.matcher(currentLine);
+
+                if (matcher.find()) { //Checks if the current token matches the one in the BB code
+                    if (token != "end" && token != "return") {
+                        varName = matcher.group(1); //Finds the name of the variable that is being used
+                        if (token == "while") {
+                            inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
+                        } else {
+                            executeCommand(token, varName); //Executes one of the three basic commands
+                        }
+                    } else if (token == "return") {
+                        return "return" + matcher.group(1);
+                    }
+                    return token;
+                }
+
+            }
+
+            Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
+            if (assignmentMatcher.matches()) {
+                Attempt evaluationAttempt = evaluate(assignmentMatcher.group(2));
+                if (evaluationAttempt.isSuccess) {
+                    variables.put(assignmentMatcher.group(1), evaluationAttempt.result);
+                }
             }
         }
-            return "";
-        }
-
-        }
-        return null;
+        return "";
     }
 
     private static Pattern ifPattern = Pattern.compile("if (\\S*) then;");
@@ -240,29 +234,29 @@ public class BB_Interpreter
     private ArrayList<Boolean> ifSkips = new ArrayList<Boolean>();
     private int ifDepth = 0;
     
-    private void ifStatement(String expression) {
+    private void ifStatement(String expression){
     	/*Evaluates the expression, and then determines if it is true or false
     	 * If it is true, it will not skip anything and will continue to execute
     	 * If it is false, it will skip the if statement.
     	 * 
     	 * Limitations: Can only compare 2 variables.
     	 */
-    	Matcher expressionMatcher = equivalencePattern.matcher(expression);
-    	if (expressionMatcher.matches())
-    	{
-    		if (variables.get(expressionMatcher.group(1)) == variables.get(expressionMatcher.group(2))) 
-        	{
-    			ifDepth++;
-    			ifSkips.add(ifDepth, false);
-        	}
-    		else
-    		{
-    			ifDepth++;
-    			ifSkips.add(ifDepth, true);
-    		}
-    	}
+        Matcher expressionMatcher=equivalencePattern.matcher(expression);
+        if(expressionMatcher.matches())
+        {
+            if(variables.get(expressionMatcher.group(1))==variables.get(expressionMatcher.group(2)))
+            {
+                ifDepth++;
+                ifSkips.add(ifDepth,false);
+            }
+            else
+            {
+                ifDepth++;
+            ifSkips.add(ifDepth,true);
+            }
+        }
     }
-    
+
     private static Pattern assignmentPattern = Pattern.compile("\\s*(\\w+)\\s*=(.*);\\s*");
     private static Pattern intPattern = Pattern.compile("\\s*(\\d+)\\s*");
     private static Pattern varPattern = Pattern.compile("\\s*[+-]?\\s*(\\w+)\\s*");
