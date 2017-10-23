@@ -167,30 +167,16 @@ public class BB_Interpreter
     public String readToken(String currentLine)
     {
         String varName;
-<<<<<<< HEAD
         Pattern pattern;
-=======
         
         if(ifSkips.isEmpty()) ifSkips.add(false);
->>>>>>> Bradleys-Branch
 
         Matcher ifMatcher = ifPattern.matcher(currentLine);
         if (ifMatcher.matches())
         {
         	ifStatement(ifMatcher.group(1));
         }
-        
-<<<<<<< HEAD
-        if (ifCounter == 0) 
-        { //Loop through all of the commands
-        for (String token : commands) {
-            if(funcDepth==0) {
-                 pattern = Pattern.compile("^(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "(\\w+|\\d+)?;\\s*)$");
-            }else{
-                StringBuilder tabs = new StringBuilder();
-                for (int i = 1; i <= funcDepth ; i++) {
-                    tabs = tabs.append("\\t");
-=======
+
         if (currentLine.contains("endIf"))
         {
         	ifDepth--;
@@ -222,7 +208,6 @@ public class BB_Interpreter
                         }
                     }
                     return token;
->>>>>>> Bradleys-Branch
                 }
                 pattern = Pattern.compile("^"+tabs.toString()+"(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "\\s*;\\s*)$");
             }
@@ -240,7 +225,6 @@ public class BB_Interpreter
                 }
                 return token;
             }
-<<<<<<< HEAD
 
         }  else if (ifCounter > 0 && currentLine.contains("endIf"))
         {
@@ -258,12 +242,10 @@ public class BB_Interpreter
             }
         }
             return "";
-=======
         }
 
         
         return null;
->>>>>>> Bradleys-Branch
     }
 
     private static Pattern ifPattern = Pattern.compile("if (\\S*) then;");
@@ -276,8 +258,7 @@ public class BB_Interpreter
     	 * If it is true, it will not skip anything and will continue to execute
     	 * If it is false, it will skip the if statement.
     	 * 
-    	 * Limitations: Can only compared 2 variables.
-    	 * 				No elses.
+    	 * Limitations: Can only compare 2 variables.
     	 */
     	Matcher expressionMatcher = equivalencePattern.matcher(expression);
     	if (expressionMatcher.matches())
