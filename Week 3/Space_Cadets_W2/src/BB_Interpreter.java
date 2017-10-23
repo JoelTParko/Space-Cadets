@@ -185,52 +185,39 @@ public class BB_Interpreter
         {
         	ifSkips.set(ifDepth, !ifSkips.get(ifDepth));
         }
+                	
         
         if (ifSkips.get(ifDepth) == false) 
         {
         	//Loop through all of the commands
-            for (String token : commands)
+        	for (String token : commands)
             {
-                Pattern pattern = Pattern.compile("(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)");
-                Matcher matcher = pattern.matcher(currentLine);
-                if (matcher.matches())     //Checks if the current token matches the one in the BB code
-                {
-                    if (token != "end")
-                    {
-                        varName = matcher.group(1); //Finds the name of the variable that is being used
-                        if (token == "while")
-                        {
-                            inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
-                        }
-                        else
-                        {
-                            executeCommand(token, varName); //Executes one of the three basic commands
-                        }
-                    }
-                    return token;
-                }
+            	if(funcDepth==0) {
+            		pattern = Pattern.compile("^(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "(\\w+|\\d+)?;\\s*)$");
+            	}else{
+            		StringBuilder tabs = new StringBuilder();
+            		for (int i = 1; i <= funcDepth ; i++) {
+                    	tabs = tabs.append("\\t");
+            	}
+ 
                 pattern = Pattern.compile("^"+tabs.toString()+"(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "\\s*;\\s*)$");
-            }
-            Matcher matcher = pattern.matcher(currentLine);
-            if (matcher.find()) { //Checks if the current token matches the one in the BB code
-                if (token != "end" && token != "return") {
-                    varName = matcher.group(1); //Finds the name of the variable that is being used
-                    if (token == "while") {
-                        inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
-                    } else {
-                        executeCommand(token, varName); //Executes one of the three basic commands
-                    }
-                }else if(token == "return"){
-                    return "return"+matcher.group(1);
-                }
-                return token;
-            }
+	            Matcher matcher = pattern.matcher(currentLine);
+	            
+	            if (matcher.find()) { //Checks if the current token matches the one in the BB code
+	                if (token != "end" && token != "return") {
+	                    varName = matcher.group(1); //Finds the name of the variable that is being used
+	                    if (token == "while") {
+	                        inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
+	                    } else {
+	                        executeCommand(token, varName); //Executes one of the three basic commands
+	                    }
+	                }else if(token == "return"){
+	                    return "return"+matcher.group(1);
+	                }
+	                return token;
+	            }
 
-        }  else if (ifCounter > 0 && currentLine.contains("endIf"))
-        {
-        	//ifSkip = false;
-        	ifCounter--;
-        }
+            	}
     
         Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
         if (assignmentMatcher.matches())
@@ -244,7 +231,7 @@ public class BB_Interpreter
             return "";
         }
 
-        
+        }
         return null;
     }
 
