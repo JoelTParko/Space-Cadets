@@ -139,7 +139,7 @@ public class BB_Interpreter
         return null;
     }
 
-    private static Pattern assignmentPattern = Pattern.compile("\\s*(\\w+)\\s*=(.*);");
+    private static Pattern assignmentPattern = Pattern.compile("\\s*(\\w+)\\s*=(.*);\\s*");
     private static Pattern intPattern = Pattern.compile("\\s*(\\d+)\\s*");
     private static Pattern varPattern = Pattern.compile("\\s*[+-]?\\s*(\\w+)\\s*");
     private static Pattern bracketsPattern = Pattern.compile("\\s*\\((.+)\\)\\s*");
@@ -155,6 +155,42 @@ public class BB_Interpreter
         if (bracketsMatcher.matches())
             return evaluate(bracketsMatcher.group(1));
 
+        Matcher multiplicationMatcher = multiplicationPattern.matcher(expression);
+        if (multiplicationMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(multiplicationMatcher.group(1));
+            Attempt rightAttempt = evaluate(multiplicationMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+                return new Attempt(true, leftAttempt.result * rightAttempt.result);
+        }
+
+        Matcher divisionMatcher = divisionPattern.matcher(expression);
+        if (divisionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(divisionMatcher.group(1));
+            Attempt rightAttempt = evaluate(divisionMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+                return new Attempt(true, leftAttempt.result / rightAttempt.result);
+        }
+
+        Matcher additionMatcher = additionPattern.matcher(expression);
+        if (additionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(additionMatcher.group(1));
+            Attempt rightAttempt = evaluate(additionMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+            return new Attempt(true, leftAttempt.result + rightAttempt.result);
+        }
+
+        Matcher subtractionMatcher = subtractionPattern.matcher(expression);
+        if (subtractionMatcher.matches())
+        {
+            Attempt leftAttempt = evaluate(subtractionMatcher.group(1));
+            Attempt rightAttempt = evaluate(subtractionMatcher.group(2));
+            if (leftAttempt.isSuccess && rightAttempt.isSuccess)
+            return new Attempt(true, leftAttempt.result / rightAttempt.result);
+        }
+
         Matcher intMatcher = intPattern.matcher(expression);
         if (intMatcher.matches())
             return new Attempt(true, Integer.parseInt(intMatcher.group(1)));
@@ -163,37 +199,6 @@ public class BB_Interpreter
         if (varMatcher.matches() && variables.containsKey(varMatcher.group(1)))
             return new Attempt(true, variables.get(varMatcher.group(1)));
 
-        Matcher additionMatcher = additionPattern.matcher(expression);
-        if (additionMatcher.matches())
-        {
-            Attempt leftAttempt = evaluate(additionMatcher.group(1));
-            Attempt rightAttempt = evaluate(additionMatcher.group(2));
-            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result + rightAttempt.result);
-        }
-
-        Matcher multiplicationMatcher = multiplicationPattern.matcher(expression);
-        if (multiplicationMatcher.matches())
-        {
-            Attempt leftAttempt = evaluate(multiplicationMatcher.group(1));
-            Attempt rightAttempt = evaluate(multiplicationMatcher.group(2));
-            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result * rightAttempt.result);
-        }
-
-        Matcher divisionMatcher = divisionPattern.matcher(expression);
-        if (divisionMatcher.matches())
-        {
-            Attempt leftAttempt = evaluate(divisionMatcher.group(1));
-            Attempt rightAttempt = evaluate(divisionMatcher.group(2));
-            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result / rightAttempt.result);
-        }
-
-        Matcher subtractionMatcher = subtractionPattern.matcher(expression);
-        if (subtractionMatcher.matches())
-        {
-            Attempt leftAttempt = evaluate(subtractionMatcher.group(1));
-            Attempt rightAttempt = evaluate(subtractionMatcher.group(2));
-            return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result / rightAttempt.result);
-        }
         return new Attempt(false, 0);
     }
 
