@@ -167,7 +167,12 @@ public class BB_Interpreter
     public String readToken(String currentLine)
     {
         String varName;
+<<<<<<< HEAD
         Pattern pattern;
+=======
+        
+        if(ifSkips.isEmpty()) ifSkips.add(false);
+>>>>>>> Bradleys-Branch
 
         Matcher ifMatcher = ifPattern.matcher(currentLine);
         if (ifMatcher.matches())
@@ -175,6 +180,7 @@ public class BB_Interpreter
         	ifStatement(ifMatcher.group(1));
         }
         
+<<<<<<< HEAD
         if (ifCounter == 0) 
         { //Loop through all of the commands
         for (String token : commands) {
@@ -184,6 +190,39 @@ public class BB_Interpreter
                 StringBuilder tabs = new StringBuilder();
                 for (int i = 1; i <= funcDepth ; i++) {
                     tabs = tabs.append("\\t");
+=======
+        if (currentLine.contains("endIf"))
+        {
+        	ifDepth--;
+        }
+        else if (currentLine.contains("else"))
+        {
+        	ifSkips.set(ifDepth, !ifSkips.get(ifDepth));
+        }
+        
+        if (ifSkips.get(ifDepth) == false) 
+        {
+        	//Loop through all of the commands
+            for (String token : commands)
+            {
+                Pattern pattern = Pattern.compile("(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)");
+                Matcher matcher = pattern.matcher(currentLine);
+                if (matcher.matches())     //Checks if the current token matches the one in the BB code
+                {
+                    if (token != "end")
+                    {
+                        varName = matcher.group(1); //Finds the name of the variable that is being used
+                        if (token == "while")
+                        {
+                            inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
+                        }
+                        else
+                        {
+                            executeCommand(token, varName); //Executes one of the three basic commands
+                        }
+                    }
+                    return token;
+>>>>>>> Bradleys-Branch
                 }
                 pattern = Pattern.compile("^"+tabs.toString()+"(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "\\s*;\\s*)$");
             }
@@ -201,6 +240,7 @@ public class BB_Interpreter
                 }
                 return token;
             }
+<<<<<<< HEAD
 
         }  else if (ifCounter > 0 && currentLine.contains("endIf"))
         {
@@ -218,11 +258,18 @@ public class BB_Interpreter
             }
         }
             return "";
+=======
+        }
+
+        
+        return null;
+>>>>>>> Bradleys-Branch
     }
 
     private static Pattern ifPattern = Pattern.compile("if (\\S*) then;");
     private static Pattern equivalencePattern = Pattern.compile("(\\w+)\\s*=\\s*(\\w+)");
-    private int ifCounter = 0;
+    private ArrayList<Boolean> ifSkips = new ArrayList<Boolean>();
+    private int ifDepth = 0;
     
     private void ifStatement(String expression) {
     	/*Evaluates the expression, and then determines if it is true or false
@@ -230,14 +277,21 @@ public class BB_Interpreter
     	 * If it is false, it will skip the if statement.
     	 * 
     	 * Limitations: Can only compared 2 variables.
+    	 * 				No elses.
     	 */
     	Matcher expressionMatcher = equivalencePattern.matcher(expression);
     	if (expressionMatcher.matches())
     	{
-    		if (!(variables.get(expressionMatcher.group(1)) == variables.get(expressionMatcher.group(2)))) 
+    		if (variables.get(expressionMatcher.group(1)) == variables.get(expressionMatcher.group(2))) 
         	{
-    			ifCounter++;
+    			ifDepth++;
+    			ifSkips.add(ifDepth, false);
         	}
+    		else
+    		{
+    			ifDepth++;
+    			ifSkips.add(ifDepth, true);
+    		}
     	}
     }
     
