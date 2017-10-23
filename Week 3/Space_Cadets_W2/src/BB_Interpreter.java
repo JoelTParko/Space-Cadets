@@ -53,6 +53,7 @@ public class BB_Interpreter
         }
     }
 */
+    
     public int next(String currentLine, int index)
     {
 
@@ -90,6 +91,7 @@ public class BB_Interpreter
 
         return jumpPoint;
     }
+    
 /*
     public boolean checkForFunction(String currentLine){ //checks for a function call
         Pattern pattern = Pattern.compile("^func\\s+(\\w+)\\(\\);\\s*$");
@@ -105,40 +107,77 @@ public class BB_Interpreter
     {
         String varName;
 
-        //Loop through all of the commands
-        for (String token : commands)
+        Matcher ifMatcher = ifPattern.matcher(currentLine);
+        if (ifMatcher.matches())
         {
-            Pattern pattern = Pattern.compile("(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)");
-            Matcher matcher = pattern.matcher(currentLine);
-            if (matcher.matches())     //Checks if the current token matches the one in the BB code
+        	ifStatement(ifMatcher.group(1));
+        }
+        
+        if (ifCounter == 0) 
+        {
+        	//Loop through all of the commands
+            for (String token : commands)
             {
-                if (token != "end")
+                Pattern pattern = Pattern.compile("(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)");
+                Matcher matcher = pattern.matcher(currentLine);
+                if (matcher.matches())     //Checks if the current token matches the one in the BB code
                 {
-                    varName = matcher.group(1); //Finds the name of the variable that is being used
-                    if (token == "while")
+                    if (token != "end")
                     {
-                        inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
+                        varName = matcher.group(1); //Finds the name of the variable that is being used
+                        if (token == "while")
+                        {
+                            inWhile = whileCheck(varName, matcher.group(2)); //Checks if the while condition has been met
+                        }
+                        else
+                        {
+                            executeCommand(token, varName); //Executes one of the three basic commands
+                        }
                     }
-                    else
-                    {
-                        executeCommand(token, varName); //Executes one of the three basic commands
-                    }
+                    return token;
                 }
-                return token;
             }
-        }
-        Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
-        if (assignmentMatcher.matches())
-        {
-            Attempt evaluationAttempt = evaluate(assignmentMatcher.group(2));
-            if (evaluationAttempt.isSuccess)
+            Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
+            if (assignmentMatcher.matches())
             {
-                variables.put(assignmentMatcher.group(1), evaluationAttempt.result);
+                Attempt evaluationAttempt = evaluate(assignmentMatcher.group(2));
+                if (evaluationAttempt.isSuccess)
+                {
+                    variables.put(assignmentMatcher.group(1), evaluationAttempt.result);
+                }
             }
         }
+        else if (ifCounter > 0 && currentLine.contains("endIf"))
+        {
+        	//ifSkip = false;
+        	ifCounter--;
+        }
+        
+        
         return null;
     }
 
+    private static Pattern ifPattern = Pattern.compile("if (\\S*) then;");
+    private static Pattern equivalencePattern = Pattern.compile("(\\w+)\\s*=\\s*(\\w+)");
+    private int ifCounter = 0;
+    
+    private void ifStatement(String expression) {
+    	/*Evaluates the expression, and then determines if it is true or false
+    	 * If it is true, it will not skip anything and will continue to execute
+    	 * If it is false, it will skip the if statement.
+    	 * 
+    	 * Limitations: Can only compared 2 variables.
+    	 */
+    	Matcher expressionMatcher = equivalencePattern.matcher(expression);
+    	if (expressionMatcher.matches())
+    	{
+    		if (!(variables.get(expressionMatcher.group(1)) == variables.get(expressionMatcher.group(2)))) 
+        	{
+    			ifCounter++;
+        	}
+    	}
+    }
+    
     private static Pattern assignmentPattern = Pattern.compile("\\s*(\\w+)\\s*=(.*);\\s*");
     private static Pattern intPattern = Pattern.compile("\\s*(\\d+)\\s*");
     private static Pattern varPattern = Pattern.compile("\\s*[+-]?\\s*(\\w+)\\s*");
