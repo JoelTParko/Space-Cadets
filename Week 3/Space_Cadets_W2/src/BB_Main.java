@@ -5,7 +5,7 @@ import java.util.List;
 
 public class BB_Main {
 	
-    public static void main(String[] args)throws Exception{
+    public static void main(String[] args) throws Exception{
         String fileName = getInput();
         String fileLocation;
         String currentLine;
