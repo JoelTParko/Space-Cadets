@@ -144,13 +144,16 @@ public class BB_Interpreter
     private static Pattern varPattern = Pattern.compile("\\s*[+-]?\\s*(\\w+)\\s*");
     private static Pattern bracketsPattern = Pattern.compile("\\s*\\((.+)\\)\\s*");
     private static Pattern additionPattern = Pattern.compile("(.*)\\+(.*)");
-    private static Pattern multiplicationPattern = Pattern.compile("(.*)\\*(.*)");
+    private static Pattern multiplicationPattern = Pattern.compile("(.+)\\*(.+)");
     private static Pattern subtractionPattern = Pattern.compile("(.*)-(.*)");
     private static Pattern divisionPattern = Pattern.compile("(.*)/(.*)");
 
     //Evaluates a mathematical expression
     private Attempt evaluate(String expression)
     {
+        Matcher bracketsMatcher = bracketsPattern.matcher(expression);
+        if (bracketsMatcher.matches())
+            return evaluate(bracketsMatcher.group(1));
 
         Matcher intMatcher = intPattern.matcher(expression);
         if (intMatcher.matches())
@@ -191,15 +194,10 @@ public class BB_Interpreter
             Attempt rightAttempt = evaluate(subtractionMatcher.group(2));
             return new Attempt(leftAttempt.isSuccess && rightAttempt.isSuccess, leftAttempt.result / rightAttempt.result);
         }
-
-        Matcher bracketsMatcher = bracketsPattern.matcher(expression);
-        if (varMatcher.matches())
-            return evaluate(bracketsMatcher.group(1));
-
         return new Attempt(false, 0);
     }
 
-    private class Attempt
+    public class Attempt
     {
         public boolean isSuccess;
         public int result;
