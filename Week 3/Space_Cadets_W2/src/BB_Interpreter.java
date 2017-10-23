@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import java.beans.Expression;
+=======
+import javafx.geometry.Pos;
+
+>>>>>>> Joel's-Branch
 import java.util.HashMap;
 import java.util.regex.*;
 import java.util.*;
@@ -9,65 +14,141 @@ public class BB_Interpreter
     private int whileCount = 0;
     private int startIndex = 0;
     private int endIndex;
-    private Map<String, Integer> functions = new HashMap<>();
+    private int funcDepth;
+    private String returnVariable;
+    private Map<String, Integer[]> functions = new HashMap<>();
     private Stack<Integer> whileStack = new Stack<>();
+<<<<<<< HEAD
     private String[] commands = {"clear", "incr", "decr", "while", "end", ""};
     private HashMap<String, Integer> variables = new HashMap<>();
+=======
+    private String[] commands = {"clear", "incr", "decr", "while", "end","return", ""};
+    private Map<String, Integer> variables = new HashMap<>();
+>>>>>>> Joel's-Branch
     private List<String> fileLines;
 
     public BB_Interpreter(List<String> fileLines)
     {
         this.fileLines = fileLines;
         this.endIndex = fileLines.size();
-
-        //findFunctions();
+        this.funcDepth = 0;
+        findFunctions();
     }
 
+<<<<<<< HEAD
     public BB_Interpreter(List<String> fileLines, int startIndex, int endIndex)
     {
+=======
+    public BB_Interpreter(List<String> fileLines, int funcDepth){
+>>>>>>> Joel's-Branch
         this.fileLines = fileLines;
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
-
-        //findFunctions();
+        this.endIndex = fileLines.size();
+        this.funcDepth = funcDepth;
+        findFunctions();
     }
 
+    public int getReturnValue(){
+        return variables.get(returnVariable);
+    }
+
+<<<<<<< HEAD
     /*
     public void findFunctions()
     {
+=======
+    public void findFunctions(){
+>>>>>>> Joel's-Branch
         String currentLine;
-        String functionName;
-        boolean foundFunction;
-        int index, index2;
-        Pattern pattern = Pattern.compile("^func\\s+(\\w+)\\s*:\\s*$");
+        String funcName ="";
+        boolean funcFound = false;
+        Integer[] locations = {0,0};
+        int index;
+
+        Pattern startFunc = Pattern.compile("^func\\s+(\\w+)\\(\\)\\s*:\\s*$");
+        Pattern endFunc = Pattern.compile("^fEnd;$");
         Iterator<String> iterator = fileLines.listIterator(startIndex);
         index = startIndex;
 
         while(index < endIndex){
             index++;
             currentLine = iterator.next();
-            Matcher match = pattern.matcher(currentLine);
+            Matcher match = startFunc.matcher(currentLine);
+            Matcher match2 = endFunc.matcher(currentLine);
             if(match.find()){
-                functionName = match.group(1);
+                locations[0] = index;
+                funcName = match.group(1);
+                funcFound = true;
+
+            }else if(!match2.find()&&funcFound){
+                locations[1] = index;
+                functions.put(funcName,locations);
             }
+
         }
     }
+<<<<<<< HEAD
 */
     public int next(String currentLine, int index)
     {
+=======
+>>>>>>> Joel's-Branch
 
+    public int next(String currentLine, int index){
+        StringBuilder funcName = new StringBuilder();
         String token;
-        int jumpPoint = 0;
-
+        StringBuilder varName = new StringBuilder();
+        int returnJump = 0;
         //Removes comments from the code
         currentLine = deCommenter(currentLine);
-        /*
-        if(checkForFunction(currentLine)){
 
+        if(checkForFunction(currentLine, funcName, varName)){
+            int funcIndex;
+            int funcJump;
+            int returnValue;
+            returnJump = index;
+
+            BB_Interpreter functionInterpreter = new BB_Interpreter(fileLines, funcDepth+1);
+            PositionableIterator iterator = new PositionableIterator(fileLines);
+            iterator.moveTo(functions.get(funcName.toString())[0]);
+            funcIndex = functions.get(funcName.toString())[0];
+            do{
+                funcIndex++;
+                currentLine = iterator.next();
+                funcJump = functionInterpreter.next(currentLine, funcIndex);
+                if(funcJump>0){
+                    iterator.moveTo(funcJump);
+                    funcIndex = funcJump;
+                }else if(funcJump == -1){
+                    returnValue = functionInterpreter.getReturnValue();
+                    String test = varName.toString();
+                    variables.put(varName.toString(),variables.get(varName.toString())+returnValue);
+                    funcIndex = functions.get(funcName.toString())[1];
+                }
+            }while(funcIndex< functions.get(funcName.toString())[1]);
+        }else{
+            token = readToken(currentLine); //Identifies the token, will execute the code if its a basic command/Checks for condition met in while loops
+            if(token == "while"){
+                if(!inWhile){ //Jumps to the end of a while loop if the condition was met
+                    returnJump = endIndex;
+                }else{ //Adds the location of the current while statement to the while stack
+                    whileStack.push(index - 1);
+                    whileCount++;
+                }
+            }else if(token == "end" && whileCount > 0){//Checks if the program should jump back to the previous while statement or not
+                returnJump = whileStack.pop();
+                endIndex = index;
+                whileCount--;
+            }else if(token.contains("return")){
+                returnVariable = token.substring(6);
+                return -1;
+            }
         }
-        */
+        return returnJump;
+    }
 
+    public boolean checkForFunction(String currentLine, StringBuilder fName, StringBuilder varName){ //checks for a function call
 
+<<<<<<< HEAD
         token = readToken(currentLine); //Identifies the token, will execute the code if its a basic command/Checks for condition met in while loops
         if(token == "while")
         {
@@ -96,16 +177,33 @@ public class BB_Interpreter
         Matcher match = pattern.matcher(currentLine);
         if(match.find()){
             return true;
+=======
+        for (String funcName: functions.keySet()) {
+            String patternString = "^(?:(\\w+)\\s*=\\s*)?"+funcName+"\\((?:\\w*(,\\s*\\w*)*)?\\);\\s*$";
+            Pattern pattern = Pattern.compile(patternString);
+            Matcher match = pattern.matcher(currentLine);
+            if(match.find()){
+                fName.append(funcName);
+                for (String var: variables.keySet()) {
+                    String test = match.group(1);
+                    if (var.equals(test)){
+                        varName.append(match.group(1));
+                    }
+                }
+                return true;
+            }
+>>>>>>> Joel's-Branch
         }
         return false;
     }
-    */
+
 
     public String readToken(String currentLine)
     {
         String varName;
-
+        Pattern pattern;
         //Loop through all of the commands
+<<<<<<< HEAD
         for (String token : commands)
         {
             Pattern pattern = Pattern.compile("(?:\\s*" + token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:\\s*" + token + "\\s*;\\s*)");
@@ -114,6 +212,21 @@ public class BB_Interpreter
             {
                 if (token != "end")
                 {
+=======
+        for (String token : commands) {
+            if(funcDepth==0) {
+                 pattern = Pattern.compile("^(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "(\\w+|\\d+)?;\\s*)$");
+            }else{
+                StringBuilder tabs = new StringBuilder();
+                for (int i = 1; i <= funcDepth ; i++) {
+                    tabs = tabs.append("\\t");
+                }
+                pattern = Pattern.compile("^"+tabs.toString()+"(?:"+token + "\\s+(\\w+)(?:\\s+not\\s+(\\d+)\\s+do)?\\s*;\\s*)|(?:" + token + "\\s*;\\s*)$");
+            }
+            Matcher matcher = pattern.matcher(currentLine);
+            if (matcher.find()) { //Checks if the current token matches the one in the BB code
+                if (token != "end" && token != "return") {
+>>>>>>> Joel's-Branch
                     varName = matcher.group(1); //Finds the name of the variable that is being used
                     if (token == "while")
                     {
@@ -123,10 +236,14 @@ public class BB_Interpreter
                     {
                         executeCommand(token, varName); //Executes one of the three basic commands
                     }
+                }else if(token == "return"){
+                    return "return"+matcher.group(1);
                 }
                 return token;
             }
+
         }
+<<<<<<< HEAD
         Matcher assignmentMatcher = assignmentPattern.matcher(currentLine);
         if (assignmentMatcher.matches())
         {
@@ -137,6 +254,9 @@ public class BB_Interpreter
             }
         }
         return null;
+=======
+        return "";
+>>>>>>> Joel's-Branch
     }
 
     private static Pattern assignmentPattern = Pattern.compile("\\s*(\\w+)\\s*=(.*);\\s*");

@@ -31,6 +31,7 @@ public class BB_Main {
 		BB_Interpreter mainInterpreter = new BB_Interpreter(fileLines); //Initialising the interpreter
 		PositionableIterator iterator = new PositionableIterator(fileLines); //Allows the program to jump between different points in the BareBones code
 
+
         do{
             index++;
             currentLine = iterator.next(); //Gets the next line of BareBones code
