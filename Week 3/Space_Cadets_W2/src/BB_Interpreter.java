@@ -106,6 +106,8 @@ public class BB_Interpreter
     public String readToken(String currentLine)
     {
         String varName;
+        
+        if(ifSkips.isEmpty()) ifSkips.add(false);
 
         Matcher ifMatcher = ifPattern.matcher(currentLine);
         if (ifMatcher.matches())
@@ -113,7 +115,16 @@ public class BB_Interpreter
         	ifStatement(ifMatcher.group(1));
         }
         
-        if (ifCounter == 0) 
+        if (currentLine.contains("endIf"))
+        {
+        	ifDepth--;
+        }
+        else if (currentLine.contains("else"))
+        {
+        	ifSkips.set(ifDepth, !ifSkips.get(ifDepth));
+        }
+        
+        if (ifSkips.get(ifDepth) == false) 
         {
         	//Loop through all of the commands
             for (String token : commands)
@@ -147,19 +158,15 @@ public class BB_Interpreter
                 }
             }
         }
-        else if (ifCounter > 0 && currentLine.contains("endIf"))
-        {
-        	//ifSkip = false;
-        	ifCounter--;
-        }
-        
+
         
         return null;
     }
 
     private static Pattern ifPattern = Pattern.compile("if (\\S*) then;");
     private static Pattern equivalencePattern = Pattern.compile("(\\w+)\\s*=\\s*(\\w+)");
-    private int ifCounter = 0;
+    private ArrayList<Boolean> ifSkips = new ArrayList<Boolean>();
+    private int ifDepth = 0;
     
     private void ifStatement(String expression) {
     	/*Evaluates the expression, and then determines if it is true or false
@@ -167,14 +174,21 @@ public class BB_Interpreter
     	 * If it is false, it will skip the if statement.
     	 * 
     	 * Limitations: Can only compared 2 variables.
+    	 * 				No elses.
     	 */
     	Matcher expressionMatcher = equivalencePattern.matcher(expression);
     	if (expressionMatcher.matches())
     	{
-    		if (!(variables.get(expressionMatcher.group(1)) == variables.get(expressionMatcher.group(2)))) 
+    		if (variables.get(expressionMatcher.group(1)) == variables.get(expressionMatcher.group(2))) 
         	{
-    			ifCounter++;
+    			ifDepth++;
+    			ifSkips.add(ifDepth, false);
         	}
+    		else
+    		{
+    			ifDepth++;
+    			ifSkips.add(ifDepth, true);
+    		}
     	}
     }
     
