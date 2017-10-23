@@ -28,8 +28,9 @@ public class BB_Main {
 		FileReader reader = new FileReader(fileLocation);
 		fileLines = reader.readFile();
 
-		BB_Interpreter mainInterpreter = new BB_Interpreter(fileLines); //Inialising the interpreter
+		BB_Interpreter mainInterpreter = new BB_Interpreter(fileLines); //Initialising the interpreter
 		PositionableIterator iterator = new PositionableIterator(fileLines); //Allows the program to jump between different points in the BareBones code
+
 
         do{
             index++;
