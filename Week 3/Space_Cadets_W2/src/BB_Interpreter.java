@@ -34,9 +34,12 @@ public class BB_Interpreter
         this.funcDepth = funcDepth;
 
         String[] varNames = null;
+        String declareLine;
+
+        declareLine = deCommenter(fileLines.get(startPoint-1));
         Pattern func = Pattern.compile("^func\\s+(\\w+)\\((\\w*(?:,\\s*\\w*)*)\\)\\s*:\\s*$");
-        Matcher match = func.matcher(fileLines.get(startPoint-1));
-        String t = fileLines.get(startPoint-1);
+        Matcher match = func.matcher(declareLine);
+
         if(match.find()){
             varNames =  match.group(2).split(",");
         }
@@ -68,6 +71,7 @@ public class BB_Interpreter
         while(index < endIndex){
             index++;
             currentLine = iterator.next();
+            currentLine = deCommenter(currentLine);
             Matcher match = startFunc.matcher(currentLine);
             Matcher match2 = endFunc.matcher(currentLine);
             if(match.find()){
@@ -143,7 +147,7 @@ public class BB_Interpreter
     }
 
     public boolean checkForFunction(String currentLine, StringBuilder fName, StringBuilder varName, StringBuilder parameters){ //checks for a function call
-    
+
         for (String funcName: functions.keySet()) {
             String patternString = "^(?:(\\w+)\\s*=\\s*)?"+funcName+"\\((.*(,\\s*.*)*)?\\);\\s*$";
             Pattern pattern = Pattern.compile(patternString);
