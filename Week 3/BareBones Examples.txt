@@ -1,0 +1,34 @@
+index=20;
+clear countUp;
+clear modCounter;
+zero = 0;
+while index not 0 do;
+decr index;
+incr countUp;
+modResultI = checkForMod(countUp, 3);
+modResultII = checkForMod(countUp, 5);
+if modResultI = zero then;
+incr modCounter;
+else;
+if modResultII = zero then;
+incr modCounter;
+else;
+endIf;
+endIf;
+end;
+base = 4;
+index = raiseToPower(base, base-2);
+
+
+func checkForMod(mainNumber, modNumber):
+	x = mainNumber%modNumber;
+	return x;
+fEnd;
+	
+func raiseToPower(input, exponent):
+	while exponent not 0 do;
+	input = input * input;
+	decr exponent;
+	end;
+	return input;
+fEnd;
