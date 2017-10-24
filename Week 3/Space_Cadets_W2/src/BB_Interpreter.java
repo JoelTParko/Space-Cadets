@@ -271,7 +271,11 @@ public class BB_Interpreter
     {
         Matcher bracketsMatcher = bracketsPattern.matcher(expression);
         if (bracketsMatcher.matches())
-            return evaluate(bracketsMatcher.group(1));
+        {
+            Attempt inner = evaluate(bracketsMatcher.group(1));
+            if (inner.isSuccess)
+                return inner;
+        }
 
         Matcher additionMatcher = additionPattern.matcher(expression);
         if (additionMatcher.matches())
