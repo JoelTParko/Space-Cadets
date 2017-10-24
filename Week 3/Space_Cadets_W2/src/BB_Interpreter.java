@@ -18,7 +18,6 @@ public class BB_Interpreter
     private Map<String, Integer[]> functions = new HashMap<>();
     private Stack<Integer> whileStack = new Stack<>();
     private HashMap<String, Integer> variables = new HashMap<>();
-    private String[] commands = {"clear", "incr", "decr", "while", "end","return"};
     private List<String> fileLines;
 
     public BB_Interpreter(List<String> fileLines)
@@ -117,7 +116,6 @@ public class BB_Interpreter
                     funcIndex = funcJump;
                 }else if(funcJump == -1){
                     returnValue = functionInterpreter.getReturnValue();
-
                     variables.put(varName.toString(),returnValue);
                     funcIndex = functions.get(funcName.toString())[1];
                 }
@@ -166,6 +164,7 @@ public class BB_Interpreter
 
     public String readToken(String currentLine)
     {
+        String[] commands = {"clear", "incr", "decr", "while", "end","return"};
         String varName;
 
         if(ifSkips.isEmpty()) ifSkips.add(false);
