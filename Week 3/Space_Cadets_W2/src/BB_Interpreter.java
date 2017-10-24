@@ -79,6 +79,7 @@ public class BB_Interpreter
                 locations[1] = index;
                 functions.put(funcName,locations);
                 funcFound = false;
+                locations = new Integer[2];
             }
 
         }
@@ -144,18 +145,13 @@ public class BB_Interpreter
     public boolean checkForFunction(String currentLine, StringBuilder fName, StringBuilder varName, StringBuilder parameters){ //checks for a function call
     
         for (String funcName: functions.keySet()) {
-            String patternString = "^(?:(\\w+)\\s*=\\s*)?"+funcName+"\\((\\w*(,\\s*\\w*)*)?\\);\\s*$";
+            String patternString = "^(?:(\\w+)\\s*=\\s*)?"+funcName+"\\((.*(,\\s*.*)*)?\\);\\s*$";
             Pattern pattern = Pattern.compile(patternString);
             Matcher match = pattern.matcher(currentLine);
             if(match.find()){
                 fName.append(funcName);
                 parameters.append(match.group(2));
-                for (String var: variables.keySet()) {
-                    String test = match.group(1);
-                    if (var.equals(test)){
-                        varName.append(match.group(1));
-                    }
-                }
+                varName.append(match.group(1));
                 return true;
             }
         }
@@ -201,7 +197,7 @@ public class BB_Interpreter
 
                 Matcher matcher = pattern.matcher(currentLine);
 
-                if (matcher.find()) { //Checks if the current token matches the one in the BB code
+                if (matcher.matches()) { //Checks if the current token matches the one in the BB code
                     if (token != "end" && token != "return") {
                         varName = matcher.group(1); //Finds the name of the variable that is being used
                         if (token == "while") {
@@ -228,7 +224,7 @@ public class BB_Interpreter
         return "";
     }
 
-    private static Pattern ifPattern = Pattern.compile("if (\\S*) then;");
+    private static Pattern ifPattern = Pattern.compile("if\\s+(\\w+\\s*=\\s*\\w+)\\s+then;");
     private static Pattern equivalencePattern = Pattern.compile("(\\w+)\\s*=\\s*(\\w+)");
     private ArrayList<Boolean> ifSkips = new ArrayList<Boolean>();
     private int ifDepth = 0;
