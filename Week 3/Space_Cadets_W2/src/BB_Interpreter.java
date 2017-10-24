@@ -260,11 +260,11 @@ public class BB_Interpreter
     private static Pattern intPattern = Pattern.compile("\\s*(\\d+)\\s*");
     private static Pattern varPattern = Pattern.compile("\\s*[+-]?\\s*(\\w+)\\s*");
     private static Pattern bracketsPattern = Pattern.compile("\\s*\\((.+)\\)\\s*");
-    private static Pattern additionPattern = Pattern.compile("(.*)\\+(.*)");
+    private static Pattern additionPattern = Pattern.compile("(.+)\\+(.+)");
     private static Pattern multiplicationPattern = Pattern.compile("(.+)\\*(.+)");
-    private static Pattern subtractionPattern = Pattern.compile("(.*)-(.*)");
-    private static Pattern divisionPattern = Pattern.compile("(.*)/(.*)");
-    private static Pattern moduloPattern = Pattern.compile("(.*)%(.*)");
+    private static Pattern subtractionPattern = Pattern.compile("(.+)-(.+)");
+    private static Pattern divisionPattern = Pattern.compile("(.+)/(.+)");
+    private static Pattern moduloPattern = Pattern.compile("(.+)%(.+)");
 
     //Evaluates a mathematical expression
     private Attempt evaluate(String expression)
