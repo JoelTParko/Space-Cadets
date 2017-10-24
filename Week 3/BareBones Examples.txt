@@ -19,7 +19,7 @@ endIf;
 end;
 base = 4;
 index = raiseToPower(base, base-2);
-complexResult = ((index - base) * 6) % (8/base + 1);
+complexResult = ((index - base) * 6 + 2) % (8/base + 1);
 
 func modulo(mainNumber, modNumber):     //Performs a modulo function.
 	x = mainNumber%modNumber;
