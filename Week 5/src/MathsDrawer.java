@@ -60,6 +60,7 @@ public class MathsDrawer extends JFrame implements ActionListener
          cbxDrawOptions.addItem("Ellipse");
          window.add(cbxDrawOptions);
 
+         /*
          Graphics g = panel.getGraphics();
          Graphics2D drawGrid = (Graphics2D) g;
          drawGrid.setColor(Color.white);
@@ -69,6 +70,7 @@ public class MathsDrawer extends JFrame implements ActionListener
 
          drawGrid.drawLine(0,450,950,450);
          drawGrid.drawLine(475, 0, 475, 950);
+         */
      }
 
     @Override
@@ -77,8 +79,8 @@ public class MathsDrawer extends JFrame implements ActionListener
 
         Graphics g = panel.getGraphics();
         Graphics2D shape = (Graphics2D) g;
-      //  shape.setColor(Color.white);
-     //   shape.fillRect(0,0,950,900);
+        shape.setColor(Color.white);
+        shape.fillRect(0,0,950,900);
         shape.setColor(Color.black);
         shape.translate(475,450);
 
